@@ -1,3 +1,4 @@
+
 const internModel = require('../models/internModel')
 const collegeModel = require('../models/collegeModel')
 
@@ -37,36 +38,34 @@ const createIntern = async function (req, res) {
             return
         }
         if (!regexMobile.test(mobile)) {
-            res.status(400).send({ status: false, message: `number should be valid ` })
+            res.status(400).send({ status: false, message: `number should be valid mobile number` })
             return
         }
         if (!isValid(collegeName)) {
             res.status(400).send({ status: false, message: 'Invalid request parameters. Please provide valid collegeName .' })
             return
         }
-        const isNumberAlreadyUsed = await InternModel.findOne({ mobile });
+        const isNumberAlreadyUsed = await internModel.findOne({ mobile });
         if (isNumberAlreadyUsed) {
             res.status(400).send({ status: false, message: `${mobile} number is already registered` })
             return
         }
-        const isEmailAlreadyUsed = await InternModel.findOne({ email });
+        const isEmailAlreadyUsed = await internModel.findOne({ email });
         if (isEmailAlreadyUsed) {
             res.status(400).send({ status: false, message: `${email} email is already registered` })
             return
         }      //validation ends
         let nm = req.body.collegeName;
-        const collegeData = await CollegeModel.findOne({ name: nm })
+        const collegeData = await collegeModel.findOne({ name: nm })
         if (!collegeData) {
             res.status(400).send({ status: false, message: `${nm} is not a valid college name or There might be spacing or letters are in captial` })
             return
         }
         let collegeId = collegeData._id;
-        req.body.collegeId = collegeId;
-
-        const internData = { name, email, mobile, collegeName, collegeId }
-        const createIntern = await InternModel.create(internData);
+        // req.body.collegeId = collegeId;
+        const internData = { name, email, mobile, collegeName, collegeId };
+        const createIntern = await internModel.create(internData);
         res.status(201).send({ status: true, message: `Intern created successfully`, data: createIntern });
-
     } catch (err) {
         res.status(500).send({ status: false, message: err.message });
     }
@@ -78,23 +77,22 @@ const getAllInterns = async function (req, res) {//original
         if (!queryname) {
             res.status(400).send({ status: false, err: "College Name is required" })
             return
-        }
-
+        };
         let propername = queryname.replace(/\s+/g, '')
         if (propername != queryname) {
             res.status(400).send({ status: false, err: "college abbreviation contains space , try writing without any space" })
             return
-        } let tempcolgName = queryname
+        };// let tempcolgName = queryname
         // in case the query name is not in lowecase then instead of converting in lower case 
         if (queryname != queryname.toUpperCase()) {
             res.status(400).send({ status: false, err: "college abbreviation should be in upperCase. Write in capital letters and try again" })
             return
-        }  let colgName = queryname
-        let temp = await collegeModel.findOne({ name: queryname })
+        }; // let colgName = queryname
+        let temp = await collegeModel.findOne({ name: queryname });
         if (!temp) {
             res.status(400).send({ status: false, err: "Invalid parameters: Provide a valid college abbreviation" })
             return
-        }
+        };
         let ID = temp._id
         let data = temp
         // INTERN NAMES CAN HAVE MUTIPLE SPACES COZ THERE CAN BE A NAME CALLED RAHUL KUMAR SHAW SO WE PURPOSELY DID NOT REMOVED THE SPACE.
